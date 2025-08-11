@@ -5,6 +5,7 @@ Ce dossier vous permet de tester le package `airtable-types-gen` en local avant 
 ## Configuration
 
 1. **Copiez le fichier d'environnement :**
+
    ```bash
    cp .env.example .env
    ```
@@ -14,6 +15,7 @@ Ce dossier vous permet de tester le package `airtable-types-gen` en local avant 
    - `AIRTABLE_BASE_ID` : L'ID de votre base Airtable de test
 
 3. **Installez les dépendances :**
+
    ```bash
    npm install
    ```
@@ -52,21 +54,25 @@ npm run dev
 ## Structure des Tests
 
 ### 1. `test-basic.js`
+
 - Teste les commandes CLI (`--help`, `--version`)
 - Valide la gestion d'erreurs
 - Aucun credential requis
 
 ### 2. `test-flatten.js`
+
 - Teste `flattenRecord()` et `flattenRecords()`
 - Utilise des données mock
 - Démontre les avantages du flattening
 
 ### 3. `test-types.ts`
+
 - Valide la sécurité des types générés
 - Teste les types `CreateRecord`, `UpdateRecord`
 - Vérife les champs readonly/optionnels
 
 ### 4. `test-real-airtable.js`
+
 - Intégration complète avec Airtable
 - Teste l'API Meta et les records
 - Valide le workflow complet
@@ -74,12 +80,14 @@ npm run dev
 ## Workflow de Test Recommandé
 
 ### Étape 1 : Tests de Base
+
 ```bash
 npm run test:basic
 npm run test:flatten
 ```
 
 ### Étape 2 : Configuration Airtable
+
 ```bash
 # Créer .env avec vos credentials
 cp .env.example .env
@@ -87,11 +95,13 @@ cp .env.example .env
 ```
 
 ### Étape 3 : Test d'Intégration
+
 ```bash
 node src/test-real-airtable.js
 ```
 
 ### Étape 4 : Génération et Validation
+
 ```bash
 npm run generate
 npm run test:types
@@ -112,7 +122,7 @@ import { flattenRecord } from 'airtable-types-gen';
 
 // Utilisation type-safe
 const newRecord: CreateRecord<'YourTable'> = {
-  Name: "Test",
+  Name: 'Test',
   // Autres champs...
 };
 
@@ -125,18 +135,22 @@ console.log(flattened.Name); // Accès direct
 ## Résolution de Problèmes
 
 ### Erreur "Base ID is required"
+
 - Vérifiez que `AIRTABLE_BASE_ID` est défini dans `.env`
 - Format attendu : `appXXXXXXXXXX`
 
-### Erreur "Personal token is required"  
+### Erreur "Personal token is required"
+
 - Vérifiez que `AIRTABLE_PERSONAL_TOKEN` est défini dans `.env`
 - Obtenez un token depuis [Airtable Developer Hub](https://airtable.com/developers/web/api/introduction)
 
 ### Erreur de permissions
+
 - Vérifiez que le token a accès à la base
 - Vérifiez les permissions de lecture sur les tables
 
 ### Types non générés
+
 - Vérifiez que la base contient des tables
 - Vérifiez la connectivité réseau
 - Consultez les logs pour plus de détails
