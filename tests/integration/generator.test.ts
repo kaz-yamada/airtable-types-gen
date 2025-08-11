@@ -52,6 +52,24 @@ describe('generateTypes integration', () => {
     expect(result.schema).toEqual(mockAirtableSchema);
   });
 
+  it('should not contain literal \\n escape sequences in output', async () => {
+    (fetch as any).mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockAirtableSchema,
+    });
+
+    const result = await generateTypes({
+      baseId: 'appTest123',
+      token: 'test-token',
+      flatten: false,
+    });
+
+    // Heuristic: there should be no ";\n" artifacts with literal backslash n after semicolons
+    expect(result.content).not.toContain(';\\n');
+    // Ensure real newline separation between interfaces
+    expect(result.content).toMatch(/interface UsersRecord[\s\S]*interface ProjectsRecord/);
+  });
+
   it('should filter tables when specified', async () => {
     // Mock the API response
     (fetch as any).mockResolvedValueOnce({

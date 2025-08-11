@@ -96,5 +96,5 @@ For more information, visit: https://github.com/username/airtable-types-gen
 
 export const printVersion = (): void => {
   // This will be replaced during build with actual version from package.json
-  console.log('0.1.0');
+  console.log('0.1.1');
 };

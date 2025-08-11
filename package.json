@@ -1,7 +1,7 @@
 {
   "name": "airtable-types-gen",
   "author": "guischk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generate TypeScript types from Airtable base schemas with optional record flattening",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -65,6 +65,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/username/airtable-types-gen.git"
+    "url": "git+https://github.com/Guischk/airtable-types-gen.git"
   }
 }
