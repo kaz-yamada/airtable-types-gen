@@ -1,0 +1,48 @@
+import type { FieldSet, Record } from 'airtable';
+
+/**
+ * Represents a flattened Airtable record with record_id and fields at the top level
+ */
+export interface FlattenedRecord {
+  record_id: string;
+  [key: string]: any;
+}
+
+/**
+ * Flattens an Airtable record by extracting the ID and fields to the top level
+ * This removes the Airtable FieldSet wrapper structure for easier usage
+ *
+ * @param record - The Airtable record to flatten
+ * @returns A flattened record with record_id and all fields at the top level
+ *
+ * @example
+ * ```typescript
+ * const record = await base('Table').find('recXXXXXX');
+ * const flat = flattenRecord(record);
+ * console.log(flat.record_id); // 'recXXXXXX'
+ * console.log(flat.Name); // Direct access to field value
+ * ```
+ */
+export const flattenRecord = (record: Record<FieldSet>): FlattenedRecord => {
+  const { fields, id } = record;
+  return {
+    record_id: id,
+    ...fields,
+  };
+};
+
+/**
+ * Flattens multiple Airtable records
+ *
+ * @param records - Array of Airtable records to flatten
+ * @returns Array of flattened records
+ *
+ * @example
+ * ```typescript
+ * const records = await base('Table').select().all();
+ * const flattened = flattenRecords(records);
+ * ```
+ */
+export const flattenRecords = (records: Record<FieldSet>[]): FlattenedRecord[] => {
+  return records.map(flattenRecord);
+};

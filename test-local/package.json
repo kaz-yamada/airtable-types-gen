@@ -1,0 +1,26 @@
+{
+  "name": "test-airtable-types-gen",
+  "version": "1.0.0",
+  "description": "Local testing environment for airtable-types-gen",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node run-all-tests.js",
+    "generate": "node ../dist/cli/index.js --base-id $AIRTABLE_BASE_ID --output generated/types.ts",
+    "generate:flatten": "node ../dist/cli/index.js --base-id $AIRTABLE_BASE_ID --flatten --output generated/types-flat.ts",
+    "generate:help": "node ../dist/cli/index.js --help",
+    "generate:version": "node ../dist/cli/index.js --version",
+    "test:basic": "node src/test-basic.js",
+    "test:flatten": "node src/test-flatten.js",
+    "test:types": "npx tsc --noEmit src/test-types.ts",
+    "test:integration": "node src/test-real-airtable.js",
+    "dev": "npm run generate && npm run test:basic"
+  },
+  "dependencies": {
+    "airtable": "^0.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.4.2"
+  }
+}

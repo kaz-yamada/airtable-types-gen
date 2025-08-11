@@ -86,12 +86,14 @@ public
 *.sublime-workspace
 *.sublime-project
 CLAUDE.md
+.claude/
 
 # Mac system files
 .DS_Store
 
 # Windows system files
 Thumbs.db
+
 
 # Env files
 .env

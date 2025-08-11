@@ -1,0 +1,13 @@
+# Test environment specific ignores
+
+# Environment variables
+.env
+
+# Generated files
+generated/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
