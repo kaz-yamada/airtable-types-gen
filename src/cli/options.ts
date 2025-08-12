@@ -1,3 +1,4 @@
+import pkg from '../../package.json';
 export interface CliOptions {
   baseId?: string;
   output?: string;
@@ -91,10 +92,10 @@ ENVIRONMENT VARIABLES:
 For more information, visit: https://github.com/username/airtable-types-gen
 `;
 
-  console.log(help);
+  console.log(help.replace('https://github.com/username/airtable-types-gen', 'https://github.com/Guischk/airtable-types-gen'));
 };
 
 export const printVersion = (): void => {
-  // This will be replaced during build with actual version from package.json
-  console.log('0.1.1');
+  // Read version from package.json at runtime
+  console.log(pkg.version);
 };

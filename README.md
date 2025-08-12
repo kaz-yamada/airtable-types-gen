@@ -158,8 +158,12 @@ const flattened = flattenRecord(record);
 console.log(flattened.Name); // Direct access, no .fields wrapper
 
 // Flatten multiple records
+// Works with array of Record<FieldSet> or Airtable's Records<FieldSet> collection
 const records = await base('Users').select().all();
 const flattened = flattenRecords(records);
+// Or directly with the collection (e.g., from .select().firstPage())
+const page = await base('Users').select({ pageSize: 50 }).firstPage();
+const flattenedPage = flattenRecords(page);
 flattened.forEach((user) => {
   console.log(user.Name, user.Email); // Direct access to fields
 });

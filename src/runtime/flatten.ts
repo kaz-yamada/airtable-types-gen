@@ -1,11 +1,11 @@
-import type { FieldSet, Record } from 'airtable';
+import type { FieldSet, Record, Records } from 'airtable';
 
 /**
  * Represents a flattened Airtable record with record_id and fields at the top level
  */
 export interface FlattenedRecord {
   record_id: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -43,6 +43,9 @@ export const flattenRecord = (record: Record<FieldSet>): FlattenedRecord => {
  * const flattened = flattenRecords(records);
  * ```
  */
-export const flattenRecords = (records: Record<FieldSet>[]): FlattenedRecord[] => {
-  return records.map(flattenRecord);
+export const flattenRecords = (
+  records: Record<FieldSet>[] | Records<FieldSet>
+): FlattenedRecord[] => {
+  // Both Array<Record<...>> and Records<...> are array-like collections of Airtable records
+  return (records as ReadonlyArray<Record<FieldSet>>).map(flattenRecord);
 };
