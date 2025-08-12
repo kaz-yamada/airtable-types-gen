@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, expectTypeOf } from 'vitest';
 import { flattenRecord, flattenRecords } from '../../src/runtime/flatten';
 
 // Mock Airtable record structure
@@ -100,5 +100,60 @@ describe('flattenRecords', () => {
   it('should handle empty array', () => {
     const result = flattenRecords([]);
     expect(result).toEqual([]);
+  });
+});
+
+describe('flattenRecord / flattenRecords typing (generics)', () => {
+  interface UserFlat {
+    record_id: string;
+    Name: string;
+    Email?: string;
+  }
+
+  interface ProjectFlat {
+    record_id: string;
+    Title: string;
+    Status?: 'Open' | 'Closed';
+  }
+
+  it('should allow typing a single flattened record via generic parameter', () => {
+    const mockRecord = createMockRecord('recU1', { Name: 'Alice', Email: 'a@example.com' });
+
+    const typed = flattenRecord<UserFlat>(mockRecord as any);
+
+    // Runtime shape
+    expect(typed).toEqual({ record_id: 'recU1', Name: 'Alice', Email: 'a@example.com' });
+
+    // Compile-time type
+    expectTypeOf(typed).toEqualTypeOf<UserFlat>();
+  });
+
+  it('should allow typing multiple flattened records via generic parameter (two different shapes)', () => {
+    const userRecords = [
+      createMockRecord('recU2', { Name: 'Bob' }),
+      createMockRecord('recU3', { Name: 'Carol', Email: 'c@example.com' }),
+    ];
+
+    const projectRecords = [
+      createMockRecord('recP1', { Title: 'Proj A', Status: 'Open' }),
+      createMockRecord('recP2', { Title: 'Proj B' }),
+    ];
+
+    const users = flattenRecords<UserFlat>(userRecords as any);
+    const projects = flattenRecords<ProjectFlat>(projectRecords as any);
+
+    // Runtime shape
+    expect(users).toEqual([
+      { record_id: 'recU2', Name: 'Bob' },
+      { record_id: 'recU3', Name: 'Carol', Email: 'c@example.com' },
+    ]);
+    expect(projects).toEqual([
+      { record_id: 'recP1', Title: 'Proj A', Status: 'Open' },
+      { record_id: 'recP2', Title: 'Proj B' },
+    ]);
+
+    // Compile-time type
+    expectTypeOf(users).toEqualTypeOf<UserFlat[]>();
+    expectTypeOf(projects).toEqualTypeOf<ProjectFlat[]>();
   });
 });

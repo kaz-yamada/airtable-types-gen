@@ -23,12 +23,14 @@ export interface FlattenedRecord {
  * console.log(flat.Name); // Direct access to field value
  * ```
  */
-export const flattenRecord = (record: Record<FieldSet>): FlattenedRecord => {
+export const flattenRecord = <T extends { record_id: string } = FlattenedRecord>(
+  record: Record<FieldSet>
+): T => {
   const { fields, id } = record;
   return {
     record_id: id,
     ...fields,
-  };
+  } as T;
 };
 
 /**
@@ -43,9 +45,9 @@ export const flattenRecord = (record: Record<FieldSet>): FlattenedRecord => {
  * const flattened = flattenRecords(records);
  * ```
  */
-export const flattenRecords = (
+export const flattenRecords = <T extends { record_id: string } = FlattenedRecord>(
   records: Record<FieldSet>[] | Records<FieldSet>
-): FlattenedRecord[] => {
+): T[] => {
   // Both Array<Record<...>> and Records<...> are array-like collections of Airtable records
-  return (records as ReadonlyArray<Record<FieldSet>>).map(flattenRecord);
+  return (records as ReadonlyArray<Record<FieldSet>>).map((r) => flattenRecord<T>(r));
 };

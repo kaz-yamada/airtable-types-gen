@@ -3,7 +3,8 @@
 ## Vitest CJS Deprecation Warning
 
 **Issue**: When running tests, you may see this warning:
-```
+
+```text
 The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
 ```
 
@@ -14,6 +15,7 @@ The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troub
 **Status**: This is cosmetic only. The package is fully functional and ready for production use.
 
 **Workaround**: If the warning bothers you in your project, you can:
+
 1. Ignore it (recommended - it doesn't affect functionality)
 2. Use `npm run test 2>/dev/null` to hide stderr warnings
 3. Wait for Vitest 2.x which resolves this issue
@@ -21,4 +23,5 @@ The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troub
 ## Other Issues
 
 None currently known. If you encounter issues, please report them at:
-https://github.com/username/airtable-types-gen/issues
+
+<https://github.com/Guischk/airtable-types-gen/issues>

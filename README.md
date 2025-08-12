@@ -167,6 +167,16 @@ const flattenedPage = flattenRecords(page);
 flattened.forEach((user) => {
   console.log(user.Name, user.Email); // Direct access to fields
 });
+
+// Type-safe flattened results (v0.1.3+):
+// If you generated types with --flatten, you can type the output as your table's flattened interface
+import type { UsersRecord } from './types';
+
+const typedUsers: UsersRecord[] = flattenRecords<UsersRecord>(records);
+const oneUser: UsersRecord = flattenRecord<UsersRecord>(record);
+
+// Note: Ensure your generated types were created with --flatten for the
+// table interfaces (e.g., UsersRecord) to match the flattened shape.
 ```
 
 ### Advanced Usage
@@ -260,7 +270,7 @@ Handles edge cases gracefully:
 
 ```bash
 # Clone and install
-git clone https://github.com/username/airtable-types-gen
+git clone https://github.com/Guischk/airtable-types-gen
 cd airtable-types-gen
 npm install
 

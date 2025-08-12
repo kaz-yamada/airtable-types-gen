@@ -19,6 +19,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Tests re-run; no public API breaks. Build remains unchanged.
 
+## [0.1.3] - 2025-08-12
+
+### Added
+
+- Runtime: `flattenRecord` and `flattenRecords` are now generic. You can specify the expected flattened type for a table, for example:
+  `const users = flattenRecords<UsersRecord>(records);`
+  This makes it ergonomic to align the runtime output with generated flattened interfaces.
+
+### Note
+
+- No runtime behavior change; typing only.
+
 ## [0.1.1] - 2025-08-11
 
 ### Fixed
