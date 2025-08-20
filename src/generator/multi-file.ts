@@ -92,7 +92,9 @@ export const generateIndexFile = (
   // Add utility types
   if (format === 'zod') {
     lines.push('// Utility types for Zod schemas');
-    const utilityTypes = generateUtilityZodTypes(schema);
+    // Import z for z.infer in utility types
+    lines.push(`import { z } from 'zod';`);
+    const utilityTypes = generateUtilityZodTypes(schema, { flatten: options.flatten });
     lines.push(utilityTypes);
   } else {
     // Add TypeScript utility types (adapted from existing generator)

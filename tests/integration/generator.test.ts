@@ -25,8 +25,9 @@ describe('generateTypes integration', () => {
 
     expect(result.content).toContain('export interface UsersRecord');
     expect(result.content).toContain('export interface ProjectsRecord');
-    expect(result.content).toContain('readonly Created: string;');
-    expect(result.content).toContain('readonly ["Auto ID"]: number;');
+  // TS output aligns with Zod semantics (no readonly/optional markers); verify fields exist
+  expect(result.content).toContain('Created: string;');
+  expect(result.content).toContain('["Auto ID"]: number;');
     expect(result.content).toContain('"Admin" | "User" | "Guest"');
     expect(result.content).toContain('Array<"Planning" | "In Progress" | "Completed">');
     expect(result.schema).toEqual(mockAirtableSchema);

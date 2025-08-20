@@ -3,8 +3,9 @@ export interface CliOptions {
   baseId?: string;
   output?: string;
   flatten?: boolean;
+  native?: boolean;
   tables?: string[];
-  format?: 'typescript' | 'zod';
+  typescriptOnly?: boolean;
   separateFiles?: boolean;
   help?: boolean;
   version?: boolean;
@@ -39,6 +40,11 @@ export const parseArguments = (args: string[]): CliOptions => {
         options.flatten = true;
         break;
 
+      case '--native':
+      case '--no-flatten':
+        options.native = true;
+        break;
+
       case '--tables':
       case '-t':
         if (nextArg && !nextArg.startsWith('-')) {
@@ -47,11 +53,9 @@ export const parseArguments = (args: string[]): CliOptions => {
         }
         break;
 
-      case '--format':
-        if (nextArg && (nextArg === 'typescript' || nextArg === 'zod')) {
-          options.format = nextArg as 'typescript' | 'zod';
-          i++;
-        }
+      case '--typescript-only':
+      case '--ts-only':
+        options.typescriptOnly = true;
         break;
 
       case '--separate-files':
@@ -75,33 +79,36 @@ export const parseArguments = (args: string[]): CliOptions => {
 
 export const printHelp = (): void => {
   const help = `
-airtable-types-gen - Generate TypeScript types or Zod schemas from Airtable base schemas
+airtable-types-gen - Generate Zod schemas with TypeScript types from Airtable base schemas
 
 USAGE:
   airtable-types-gen [OPTIONS]
 
 EXAMPLES:
-  # Generate TypeScript types and output to stdout
-  airtable-types-gen --base-id appXXXXXXXX > types.ts
+  # Generate Zod schemas with TypeScript inference (default)
+  airtable-types-gen --base-id appXXXXXXXX > schemas.ts
   
-  # Generate Zod schemas with TypeScript inference
-  airtable-types-gen --base-id appXXXXXXXX --format zod --output schemas.ts
+  # Generate only TypeScript types (no validation)
+  airtable-types-gen --base-id appXXXXXXXX --typescript-only --output types.ts
   
   # Generate separate files per table
   airtable-types-gen --base-id appXXXXXXXX --separate-files --output ./schemas/
   
-  # Generate types with flatten support
-  airtable-types-gen --base-id appXXXXXXXX --flatten --output types.ts
+  # Generate with flatten support (all fields at root level)
+  airtable-types-gen --base-id appXXXXXXXX --flatten --output schemas.ts
   
-  # Generate types for specific tables only
-  airtable-types-gen --base-id appXXXXXXXX --tables "Users,Projects" --output types.ts
+  # Generate for specific tables only
+  airtable-types-gen --base-id appXXXXXXXX --tables "Users,Projects" --output schemas.ts
 
 OPTIONS:
   -b, --base-id <ID>       Airtable base ID (required)
   -o, --output <FILE>      Output file or directory (optional, defaults to stdout)
-  -f, --flatten           Generate types with flatten support
+  -f, --flatten           Generate flattened structure (all fields at root level)
+      --native            Generate native Airtable structure (default)
+      --no-flatten        Alias for --native
   -t, --tables <NAMES>    Comma-separated list of table names to include
-      --format <FORMAT>    Output format: "typescript" (default) or "zod"
+      --typescript-only    Generate only TypeScript types (default: Zod schemas + types)
+      --ts-only           Alias for --typescript-only
       --separate-files     Generate separate files per table (requires --output directory)
   -h, --help              Show this help message
   -v, --version           Show version information

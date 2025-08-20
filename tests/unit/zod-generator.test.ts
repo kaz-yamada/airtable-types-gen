@@ -9,8 +9,8 @@ describe('Zod Generator', () => {
 
       expect(result).toContain("import { z } from 'zod'");
       expect(result).toContain('export const UsersSchema =');
-    expect(result).toContain('export type UsersRecord =');
-      expect(result).toContain('z.infer<typeof UsersSchema>');
+  expect(result).toContain('export type UsersRecord =');
+  expect(result).toContain('z.infer<typeof UsersSchema>');
     });
 
     it('should generate flattened Zod schema', () => {
@@ -59,6 +59,12 @@ describe('Zod Generator', () => {
       if (result.includes('formula')) {
         expect(result).toContain('.optional()');
       }
+
+      // Ensure readonly fields are marked as readonly
+      expect(result).toMatch(/Created: z\.string\(\)\.datetime\(.*\)\.readonly\(\)/);
+      expect(result).toMatch(/Auto ID.*\.readonly\(\)/);
+      // And ensure the main schema references the fields object
+      expect(result).toContain('fields: UsersSchemaFields');
     });
 
     it('should handle property name conflicts', () => {
@@ -100,7 +106,26 @@ describe('Zod Generator', () => {
       expect(result).toContain("'Users'");
       
       // Should contain schema and type mappings
-      expect(result).toContain("'Users': { schema: typeof UsersSchema, type: UsersRecord }");
+  expect(result).toContain("'Users': { schema: typeof UsersSchema, type: UsersRecord }");
+
+  // Always include readonly fields arrays
+  expect(result).toContain('UsersReadonlyFields');
+  // But helpers should not be present unless flatten = true
+  expect(result).not.toMatch(/CreationSchema|UpdateSchema/);
+    });
+
+    it('should include flatten extras (flattenRecord, readonly fields, creation/update helpers) when flatten is true', () => {
+      const result = generateUtilityZodTypes(mockSchema, { flatten: true });
+
+      // Re-export of flattenRecord
+      expect(result).toContain("export { flattenRecord } from 'airtable-types-gen/runtime'");
+
+      // Per-table readonly fields array
+      expect(result).toContain('UsersReadonlyFields');
+
+      // Creation/Update helpers
+      expect(result).toContain('UsersCreationSchema');
+      expect(result).toContain('UsersUpdateSchema');
     });
   });
 

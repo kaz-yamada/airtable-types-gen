@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-08-20
+
+### 💥 Breaking Changes
+
+- **Zod is now the default format** - The CLI now generates Zod schemas with inferred TypeScript types by default (was TypeScript-only before)
+- **CLI options restructured** - Removed `--format` flag, added `--typescript-only` to generate TypeScript types without validation
+- **Type inference updated** - Zod schemas now generate `z.infer<typeof Schema>` instead of `Readonly<z.infer<typeof Schema>>` for more flexible type usage
+- **Native Airtable structure is default** - Non-flatten mode is now default, use `--flatten` for flattened structure
+
+### ✨ Added
+
+- **Perfect TypeScript/Zod alignment** - Both generators now use the exact same logic for readonly/optional field detection
+- **Zod `.readonly()` support** - Computed fields are marked with `.readonly()` for runtime immutability validation
+- **Restored v0.1.3 logic** - Brought back the correct optionality logic: `isOptional = isReadonly && !isAlwaysPresentComputed(field)`
+- **New CLI options**:
+  - `--typescript-only` / `--ts-only` - Generate only TypeScript types (no Zod validation)
+  - `--native` / `--no-flatten` - Explicitly use native Airtable structure
+- **Enhanced documentation** - README updated to reflect Zod-first approach
+
+### 🐛 Fixed
+
+- **Consistent readonly markers** - TypeScript interfaces now correctly show `readonly` for computed fields
+- **Proper optionality** - Optional fields (`?`) only applied to computed fields that may be undefined
+- **Test alignment** - All 106 tests now pass with updated expectations
+- **CLI help accuracy** - Help text reflects actual default behavior
+
+### 🔧 Technical Improvements
+
+- **Unified field classification** - Single source of truth for determining field readonly/optional status
+- **Better error handling** - More descriptive CLI error messages
+- **Improved type safety** - Runtime validation aligns perfectly with compile-time types
+
+## [0.2.2] - 2025-08-20
+
+### Changed
+
+- Align TypeScript generation with Zod semantics: no readonly or optional markers in TS interfaces; keep computed/readonly info in JSDoc. Zod output now adds `.optional()` to fields and uses `Readonly<z.infer<...>>` for type-level immutability.
+- Zod flattened outputs now re-export `flattenRecord` for convenience.
+
+### Added
+
+- For Zod multi-file outputs, the index file exposes per-table readonly fields lists, creation/update helper schemas, and imports `z` to support `z.infer` typing.
+
+### Fixed
+
+- Multi-file Zod and TypeScript generation compile cleanly in `test-local` for all combinations (format, flatten, filters). Removed duplicate Zod imports and ensured correct utility wiring.
+
 ## [0.2.1] - 2025-08-20
 
 ### Fixed in 0.2.1
@@ -13,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Naming consistency: the inferred TypeScript type for Zod is always `<Table>Record` and the Zod schema is `<Table>Schema` across single-file and multi-file outputs.
 - Multi-file index: now imports referenced schema/type symbols and re-exports them, fixing missing-identifier compile errors.
 - Utility types (Zod): map types as `{ schema: typeof <Table>Schema, type: <Table>Record }` to be valid TypeScript.
+- TypeScript generator: removed `readonly` and optional (`?`) markers in generated interfaces to align with Zod semantics and avoid divergence. Computed/readonly status remains documented in JSDoc.
 
 ### Tests
 

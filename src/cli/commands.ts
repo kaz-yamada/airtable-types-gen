@@ -25,8 +25,9 @@ export const executeGenerate = async (options: CliOptions): Promise<void> => {
   }
 
   try {
-    // Determine format and defaults
-    const format = options.format || 'typescript';
+    // Determine format and defaults (Zod by default, TypeScript only if requested)
+    const format = options.typescriptOnly ? 'typescript' : 'zod';
+    // Non-flatten (native Airtable structure) by default
     const flatten = options.flatten || false;
     const separateFiles = options.separateFiles || false;
 

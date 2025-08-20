@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { AirtableField } from '../types.js';
-import { isAlwaysPresentComputed, enrichFieldMetadata } from './schema.js';
+import { enrichFieldMetadata } from './schema.js';
 
 export interface ZodMappingResult {
   schema: z.ZodType<any>;
@@ -188,11 +188,7 @@ export const mapAirtableTypeToZod = (field: AirtableField): ZodMappingResult => 
       break;
   }
 
-  // Make computed fields that may be undefined optional
-  const isOptional = readonly && !isAlwaysPresentComputed(field);
-  if (isOptional) {
-    schema = schema.optional();
-  }
+  // Note: Optionality is now handled at the generator level for consistency with TypeScript
 
   return {
     schema,

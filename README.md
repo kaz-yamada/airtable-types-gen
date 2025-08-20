@@ -1,20 +1,20 @@
 # airtable-types-gen
 
-Generate TypeScript types from Airtable base schemas with optional record flattening utilities.
+Generate Zod schemas with TypeScript types from Airtable base schemas.
 
-Inspired by Supabase's type generation, this tool provides a simple CLI to generate strongly-typed interfaces from your Airtable bases, with smart detection of computed fields, property naming conflict resolution, and optional record flattening utilities.
+Inspired by Supabase's type generation, this tool provides a simple CLI to generate Zod validation schemas with inferred TypeScript types from your Airtable bases, featuring smart detection of computed fields, readonly validation, and runtime type safety.
 
 ## Features
 
-- 🚀 **Simple CLI** - Inspired by `supabase gen types`
-- 🎯 **Smart Type Detection** - 32+ Airtable field types mapped to TypeScript
-- 🔒 **Computed Field Awareness** - Automatic detection of readonly/computed fields
-- 🏷️ **Strict Types** - Union types for select fields, proper optional handling
-- 🛠️ **Utility Functions** - Record flattening and helper types
+- 🚀 **Simple CLI** - Inspired by `supabase gen types` with Zod-first approach
+- 🎯 **Smart Type Detection** - 32+ Airtable field types mapped to TypeScript and Zod
+- 🔒 **Readonly Validation** - Computed fields marked `.readonly()` in Zod for runtime safety
+- 🏷️ **Strict Types** - Union types for select fields, perfect TS/Zod alignment
+- 🛠️ **Runtime Utilities** - Record flattening and CRUD helper functions
 - 📦 **Multi-file Output** - Generate one file per table with an index
-- ✅ **Zod Schemas** - Generate Zod schemas with inferred TS types
+- ✅ **Zod by Default** - Runtime validation with inferred TypeScript types
 - ✨ **Conflict Resolution** - Intelligent property naming for edge cases
-- 🧪 **Well Tested** - Comprehensive test suite with Vitest
+- 🧪 **Well Tested** - Comprehensive test suite (106 tests) with Vitest
 
 ## Installation
 
@@ -49,23 +49,29 @@ export AIRTABLE_BASE_ID="appXXXXXXXX"
 
 Get your personal access token from [Airtable Developer Hub](https://airtable.com/developers/web/api/introduction).
 
-### 2. Generate types
+### 2. Generate schemas
 
 ```bash
-# Generate types to stdout (uses .env file)
-npx airtable-types-gen > types.ts
+# Generate Zod schemas with TypeScript types (default)
+npx airtable-types-gen > schemas.ts
 
-# Generate types to a specific file
+# Generate to a specific file
 npx airtable-types-gen --output src/types/airtable.ts
 
-# Generate with flatten support (adds flattenRecord utilities)
-npx airtable-types-gen --flatten --output types.ts
+# Generate only TypeScript types (no validation)
+npx airtable-types-gen --typescript-only --output types.ts
 
-# Generate types for specific tables only
-npx airtable-types-gen --tables "Users,Projects" --output types.ts
+# Generate with flatten support (all fields at root level)
+npx airtable-types-gen --flatten --output schemas.ts
+
+# Generate schemas for specific tables only
+npx airtable-types-gen --tables "Users,Projects" --output schemas.ts
+
+# Generate separate files per table
+npx airtable-types-gen --separate-files --output ./schemas/
 
 # You can still override with --base-id if needed
-npx airtable-types-gen --base-id "appXXXXXXXX" --output types.ts
+npx airtable-types-gen --base-id "appXXXXXXXX" --output schemas.ts
 ```
 
 ## CLI Options
@@ -75,10 +81,13 @@ airtable-types-gen [OPTIONS]
 
 OPTIONS:
   -b, --base-id <ID>       Airtable base ID (required)
-  -o, --output <FILE>      Output file or directory (optional, defaults to stdout)
-  -f, --flatten           Generate types with flatten support
+  -o, --output <FILE>      Output file or directory (optional, defaults to stdout)  
+  -f, --flatten           Generate flattened structure (all fields at root level)
+      --native            Generate native Airtable structure (default)
+      --no-flatten        Alias for --native
   -t, --tables <NAMES>    Comma-separated list of table names to include
-      --format <FORMAT>    Output format: "typescript" (default) or "zod"
+      --typescript-only    Generate only TypeScript types (default: Zod schemas + types)
+      --ts-only           Alias for --typescript-only
       --separate-files     Generate separate files per table (requires --output directory)
   -h, --help              Show help message
   -v, --version           Show version information
@@ -102,13 +111,13 @@ export interface UsersRecord {
   id: string;
   Name: string;
   Email: string;
-  Age?: number;
+  Age: number;
   Active: boolean;
   Role: 'Admin' | 'User' | 'Guest';
   /** 🔒 Computed by Airtable - readonly ISO date string */
-  readonly Created?: string;
+  Created: string;
   /** 🔒 Computed by Airtable - auto-incrementing number */
-  readonly 'Auto ID'?: number;
+  'Auto ID': number;
 }
 ```
 
@@ -142,7 +151,7 @@ const newUser: CreateRecord<'Users'> = {
   Email: 'john@example.com',
   Active: true,
   Role: 'User',
-  // Note: readonly fields like 'Created' and 'Auto ID' are automatically excluded
+  // Note: computed/readonly fields like 'Created' and 'Auto ID' are not required in creation flows
 };
 ```
 
@@ -235,6 +244,31 @@ if (result.success) {
 } else {
   console.error(result.error);
 }
+```
+
+### Zod specifics in v0.2.2
+
+- All field schemas are marked with `.optional()` to reflect Airtable's sparse payloads.
+- The inferred TS type exported next to each schema is `Readonly<z.infer<typeof ...>>` to model immutability at the type level.
+- In flattened Zod output (`--format zod --flatten`), the generated file also re-exports `flattenRecord` for convenience.
+- In multi-file Zod output (`--separate-files`), the index adds per-table readonly fields arrays and creation/update helpers.
+
+Example (flattened Zod + multi-file):
+
+```ts
+import { UsersSchema, type UsersRecord, UsersReadonlyFields, UsersCreationSchema, UsersUpdateSchema } from './schemas';
+// You can also import flattenRecord directly from the generated index in flattened Zod mode
+import { flattenRecord } from './schemas';
+
+// Runtime validation with typed result
+const user: UsersRecord = UsersSchema.parse({ record_id: 'rec1', Name: 'Ada' });
+
+// Readonly fields list
+console.log(UsersReadonlyFields);
+
+// Helper schemas for creation/update payloads
+UsersCreationSchema.parse({ Name: 'Ada' }); // readonly fields + record_id excluded
+UsersUpdateSchema.parse({ Name: 'Ada' });   // partial update
 ```
 
 ## Multi-file generation (new in v0.2)

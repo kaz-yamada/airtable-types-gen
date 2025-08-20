@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AirtableBaseSchema, AirtableTable } from '../types.js';
+import { enrichFieldMetadata, isAlwaysPresentComputed } from './schema.js';
 import {
   mapAirtableTypeToZod,
   generatePropertyName,
@@ -58,6 +59,8 @@ export const generateTableZodSchema = (
       propertyNames.add(propertyName);
 
       const zodMapping = mapAirtableTypeToZod(field);
+      const enrichedField = enrichFieldMetadata(field);
+      const isOptional = enrichedField.isReadonly && !isAlwaysPresentComputed(field);
 
       // Add empty line before property for readability
       lines.push('');
@@ -90,7 +93,15 @@ export const generateTableZodSchema = (
       const propertyKey = needsBrackets ? `["${propertyName.replace(/"/g, '\\"')}"]` : propertyName;
 
       // Convert Zod schema to string representation
-      const schemaStr = generateZodSchemaString(zodMapping.schema);
+      let schemaStr = generateZodSchemaString(zodMapping.schema);
+      // Apply readonly modifier for computed fields
+      if (enrichedField.isReadonly) {
+        schemaStr += '.readonly()';
+      }
+      // Apply same optionality logic as TypeScript generation
+      if (isOptional) {
+        schemaStr += '.optional()';
+      }
       lines.push(`  ${propertyKey}: ${schemaStr},`);
     });
 
@@ -120,6 +131,8 @@ export const generateTableZodSchema = (
       propertyNames.add(propertyName);
 
       const zodMapping = mapAirtableTypeToZod(field);
+      const enrichedField = enrichFieldMetadata(field);
+      const isOptional = enrichedField.isReadonly && !isAlwaysPresentComputed(field);
 
       // Add empty line before property if we have previous fields
       if (index > 0) {
@@ -154,7 +167,15 @@ export const generateTableZodSchema = (
       const propertyKey = needsBrackets ? `["${propertyName.replace(/"/g, '\\"')}"]` : propertyName;
 
       // Convert Zod schema to string representation
-      const schemaStr = generateZodSchemaString(zodMapping.schema);
+      let schemaStr = generateZodSchemaString(zodMapping.schema);
+      // Apply readonly modifier for computed fields
+      if (enrichedField.isReadonly) {
+        schemaStr += '.readonly()';
+      }
+      // Apply same optionality logic as TypeScript generation
+      if (isOptional) {
+        schemaStr += '.optional()';
+      }
       lines.push(`  ${propertyKey}: ${schemaStr},`);
     });
 
@@ -264,7 +285,11 @@ const generateZodSchemaString = (schema: z.ZodType<any>): string => {
   return 'z.any()';
 };
 
-export const generateUtilityZodTypes = (schema: AirtableBaseSchema): string => {
+export const generateUtilityZodTypes = (
+  schema: AirtableBaseSchema,
+  options?: { flatten?: boolean }
+): string => {
+  const flatten = options?.flatten ?? false;
   const tableNames = schema.tables
     .map((table) => `'${table.name.replace(/'/g, "\\'")}'`)
     .join(' | ');
@@ -277,7 +302,32 @@ export const generateUtilityZodTypes = (schema: AirtableBaseSchema): string => {
     })
     .join('\n');
 
-  return `
+  // Always expose readonly field lists for each table (useful in both modes)
+  const readonlyArraysBlock = schema.tables
+    .map((table) => {
+      const typeBase = generateSchemaName(table.name).replace(/Schema$/, '');
+      const readonlyFields = table.fields
+        .filter((f) => enrichFieldMetadata(f).isReadonly)
+        .map((f) => `'${f.name.replace(/'/g, "\\'")}'`)
+        .join(', ');
+      return `// Readonly fields for ${table.name}\nexport const ${typeBase}ReadonlyFields = [${readonlyFields}] as const;`;
+    })
+    .join('\n\n');
+
+  // Only in flattened mode, provide creation/update helpers based on flat schema shape
+  const helpersBlock = flatten
+    ? '\n' +
+      schema.tables
+        .map((table) => {
+          const schemaName = generateSchemaName(table.name);
+          const typeBase = generateSchemaName(table.name).replace(/Schema$/, '');
+          return `// Creation schema excludes readonly fields and record_id\nexport const ${typeBase}CreationSchema = createCreationSchema(${schemaName}, [...${typeBase}ReadonlyFields, 'record_id']);\nexport type ${typeBase}Creation = z.infer<typeof ${typeBase}CreationSchema>;\n\n// Update schema allows partial updates\nexport const ${typeBase}UpdateSchema = createUpdateSchema(${schemaName});\nexport type ${typeBase}Update = z.infer<typeof ${typeBase}UpdateSchema>;`;
+        })
+        .join('\n\n')
+    : '';
+
+  const base = `
+${flatten ? "import { createUpdateSchema, createCreationSchema } from 'airtable-types-gen/runtime';\n" : ''}
 /**
  * Union type of all available table names
  */
@@ -310,5 +360,19 @@ export const validateRecord = <T extends AirtableTableName>(
   // This would need to be implemented with actual schema lookup
   throw new Error('Schema validation not implemented yet');
 };
+${readonlyArraysBlock ? `\n${readonlyArraysBlock}\n` : ''}
+${helpersBlock ? `\n${helpersBlock}\n` : ''}
 `;
+
+  const extras = flatten
+    ? `
+/**
+ * Flattens an Airtable record by extracting fields and adding the ID
+ * Re-exported for convenience when using flattened Zod schemas
+ */
+export { flattenRecord } from 'airtable-types-gen/runtime';
+`
+    : '';
+
+  return base + extras;
 };
