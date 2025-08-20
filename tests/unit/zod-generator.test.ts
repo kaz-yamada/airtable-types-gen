@@ -9,7 +9,7 @@ describe('Zod Generator', () => {
 
       expect(result).toContain("import { z } from 'zod'");
       expect(result).toContain('export const UsersSchema =');
-      expect(result).toContain('export type Users =');
+    expect(result).toContain('export type UsersRecord =');
       expect(result).toContain('z.infer<typeof UsersSchema>');
     });
 
@@ -100,7 +100,7 @@ describe('Zod Generator', () => {
       expect(result).toContain("'Users'");
       
       // Should contain schema and type mappings
-      expect(result).toContain("'Users': { schema: UsersSchema, type: Users }");
+      expect(result).toContain("'Users': { schema: typeof UsersSchema, type: UsersRecord }");
     });
   });
 

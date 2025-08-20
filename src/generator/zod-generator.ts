@@ -7,14 +7,21 @@ import {
   generateTypeName,
 } from './zod-schema.js';
 
-export const generateTableZodSchema = (table: AirtableTable, flatten: boolean = false): string => {
+export const generateTableZodSchema = (
+  table: AirtableTable,
+  flatten: boolean = false,
+  options?: { includeImport?: boolean }
+): string => {
   const schemaName = generateSchemaName(table.name);
   const typeName = generateTypeName(table.name);
   const lines: string[] = [];
 
   // Add imports
-  lines.push("import { z } from 'zod';");
-  lines.push('');
+  const includeImport = options?.includeImport ?? true;
+  if (includeImport) {
+    lines.push("import { z } from 'zod';");
+    lines.push('');
+  }
 
   // Add schema header comment
   lines.push('/**');
@@ -257,9 +264,7 @@ const generateZodSchemaString = (schema: z.ZodType<any>): string => {
   return 'z.any()';
 };
 
-export const generateUtilityZodTypes = (
-  schema: AirtableBaseSchema
-): string => {
+export const generateUtilityZodTypes = (schema: AirtableBaseSchema): string => {
   const tableNames = schema.tables
     .map((table) => `'${table.name.replace(/'/g, "\\'")}'`)
     .join(' | ');
@@ -268,7 +273,7 @@ export const generateUtilityZodTypes = (
     .map((table) => {
       const schemaName = generateSchemaName(table.name);
       const typeName = generateTypeName(table.name);
-      return `  '${table.name.replace(/'/g, "\\'")}': { schema: ${schemaName}, type: ${typeName} };`;
+      return `  '${table.name.replace(/'/g, "\\'")}': { schema: typeof ${schemaName}, type: ${typeName} };`;
     })
     .join('\n');
 

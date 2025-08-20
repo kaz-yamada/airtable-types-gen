@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { AirtableBaseSchema, AirtableTable } from '../types.js';
 import { generateTableZodSchema, generateUtilityZodTypes } from './zod-generator.js';
+import { generateSchemaName, generateTypeName } from './zod-schema.js';
 import { generateTableInterface } from './types.js';
 
 export interface MultiFileResult {
@@ -24,7 +25,8 @@ export const generateSingleTableFile = (
   const { format, flatten = false } = options;
 
   if (format === 'zod') {
-    return generateTableZodSchema(table, flatten);
+    // Include import inside each file
+    return generateTableZodSchema(table, flatten, { includeImport: true });
   } else {
     // Use existing TypeScript generator but need to extract the single table logic
     return generateTableInterface(table, flatten);
@@ -43,26 +45,34 @@ export const generateIndexFile = (
   lines.push('// Re-exports all table schemas/types');
   lines.push('');
 
-  // Generate exports for each table
+  // First, add local imports so that referenced symbols exist in this module scope
   schema.tables.forEach((table) => {
     const fileName = generateTableFileName(table.name);
-
     if (format === 'zod') {
-      const schemaName =
+      const schemaName = generateSchemaName(table.name);
+      const typeName = generateTypeName(table.name);
+      lines.push(`import { ${schemaName}, type ${typeName} } from './${fileName}.js';`);
+    } else {
+      const interfaceName =
         table.name
           .replace(/[^a-zA-Z0-9\s-_]/g, '')
           .replace(/[\s-]+/g, '_')
           .split('_')
           .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-          .join('') + 'Schema';
+          .join('') + 'Record';
+      lines.push(`import type { ${interfaceName} } from './${fileName}.js';`);
+    }
+  });
 
-      const typeName = table.name
-        .replace(/[^a-zA-Z0-9\s-_]/g, '')
-        .replace(/[\s-]+/g, '_')
-        .split('_')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join('');
+  lines.push('');
 
+  // Generate exports for each table (public surface)
+  schema.tables.forEach((table) => {
+    const fileName = generateTableFileName(table.name);
+
+    if (format === 'zod') {
+      const schemaName = generateSchemaName(table.name);
+      const typeName = generateTypeName(table.name);
       lines.push(`export { ${schemaName}, type ${typeName} } from './${fileName}.js';`);
     } else {
       const interfaceName =

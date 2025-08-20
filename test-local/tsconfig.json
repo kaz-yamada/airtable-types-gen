@@ -9,7 +9,14 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": ["node"],
+    // Enable local resolution of the package during tests so generated files that
+    // re-export from "airtable-types-gen/runtime" can be type-checked without publishing.
+    "baseUrl": ".",
+    "paths": {
+      "airtable-types-gen": ["../src/index.ts"],
+      "airtable-types-gen/runtime": ["../src/runtime/index.ts"]
+    }
   },
   "include": [
     "src/**/*",

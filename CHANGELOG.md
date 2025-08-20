@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2025-08-20
+
+### Fixed in 0.2.1
+
+- Zod generation: ensure no duplicate `import { z } from 'zod'` when emitting single-file output; CLI now suppresses per-table imports in that mode.
+- Naming consistency: the inferred TypeScript type for Zod is always `<Table>Record` and the Zod schema is `<Table>Schema` across single-file and multi-file outputs.
+- Multi-file index: now imports referenced schema/type symbols and re-exports them, fixing missing-identifier compile errors.
+- Utility types (Zod): map types as `{ schema: typeof <Table>Schema, type: <Table>Record }` to be valid TypeScript.
+
+### Tests
+
+- Added integration test to generate into `test-local/generated` and run `tsc --noEmit` to validate compilation for all option combinations: format (typescript/zod), flatten on/off, separate-files on/off, and table filters.
+- Added unit tests for multi-file generation with `flatten: true` for both TypeScript and Zod.
+
 ## [0.2.0] - 2025-08-20
 
 ### Added in 0.2.0
@@ -32,33 +46,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.1.2] - 2025-08-12
 
-### Added
+### Added in 0.1.2
 
 - Runtime: `flattenRecords` now accepts both `Array<Record<FieldSet>>` and Airtable's `Records<FieldSet>` collection returned by `.select()` queries. This matches Airtable SDK defaults and eases direct piping of results.
 
-### Changed
+### Changed in 0.1.2
 
 - Types: `FlattenedRecord` index signature uses `unknown` (instead of `any`) for better type safety and to satisfy lint rules.
 
-### Internal
+### Internal in 0.1.2
 
 - Tests re-run; no public API breaks. Build remains unchanged.
 
 ## [0.1.3] - 2025-08-12
 
-### Added
+### Added in 0.1.3
 
 - Runtime: `flattenRecord` and `flattenRecords` are now generic. You can specify the expected flattened type for a table, for example:
   `const users = flattenRecords<UsersRecord>(records);`
   This makes it ergonomic to align the runtime output with generated flattened interfaces.
 
-### Note
+### Note for 0.1.3
 
 - No runtime behavior change; typing only.
 
 ## [0.1.1] - 2025-08-11
 
-### Fixed
+### Fixed in 0.1.1
 
 - **Repository URL**: Fixed repository URL in package.json (was pointing to placeholder `username/airtable-types-gen`)
 - **Version Display**: Updated CLI version display to correctly show 0.1.1
@@ -68,7 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved property name conflict resolution logic
   - Better handling of readonly and optional field detection
 
-### Added
+### Added in 0.1.1
 
 - **Dual Mode Support**: Added comprehensive support for both flattened and native Airtable record structures:
   - Flattened mode: Direct field access (`record.Name` instead of `record.fields.Name`)
@@ -86,7 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Proper TypeScript generics for complete type safety
 - **Test Coverage**: Added regression test to prevent literal escape sequence issues in output
 
-### Changed
+### Changed in 0.1.1
 
 - **Interface Structure**: Major refactoring of interface generation logic:
   - Flattened mode now uses `record_id` instead of `id` to avoid field name conflicts
@@ -100,20 +114,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Enhanced conflict resolution for property names (especially `id` field variants)
   - Better separation of concerns between flattened and native utility type generation
 
-### Technical Details
+### Technical Details (0.1.1)
 
 - **Breaking Change in Flattened Mode**: Field access uses `record_id` instead of `id` for the Airtable record identifier
 - **Improved Output Quality**: Generated TypeScript code now has proper formatting and no escape sequence artifacts
 - **Enhanced Type Safety**: Better utility types that correctly reflect the actual data structures returned by Airtable API
 - **Test Coverage**: Added specific test case to prevent regression of newline escape sequence issues
 
-### Migration Notes
+### Migration Notes (0.1.1)
 
 If upgrading from 0.1.0 and using flattened mode, update your code to use `record_id` instead of `id` when accessing the Airtable record identifier in flattened records.
 
 ## [0.1.0] - 2025-08-11
 
-### Added
+### Added in 0.1.0
 
 - Initial release of airtable-types-gen
 - CLI tool inspired by Supabase type generation
@@ -130,7 +144,7 @@ If upgrading from 0.1.0 and using flattened mode, update your code to use `recor
 - JSDoc comments with field descriptions
 - Support for stdout output (Supabase-style)
 
-### Features
+### Features in 0.1.0
 
 - **CLI**: Simple command-line interface with Supabase-inspired syntax
 - **Type Safety**: Strongly typed interfaces with proper optional handling

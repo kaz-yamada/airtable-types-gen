@@ -73,7 +73,7 @@ export const executeGenerate = async (options: CliOptions): Promise<void> => {
         // Generate Zod schemas
         const imports = "import { z } from 'zod';\n\n";
         const schemas = filteredSchema.tables
-          .map((table) => generateTableZodSchema(table, flatten))
+          .map((table) => generateTableZodSchema(table, flatten, { includeImport: false }))
           .join('\n\n');
         const utilityTypes = generateUtilityZodTypes(filteredSchema);
         content = imports + schemas + utilityTypes;
