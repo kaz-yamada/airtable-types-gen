@@ -4,6 +4,8 @@ export interface CliOptions {
   output?: string;
   flatten?: boolean;
   tables?: string[];
+  format?: 'typescript' | 'zod';
+  separateFiles?: boolean;
   help?: boolean;
   version?: boolean;
 }
@@ -45,6 +47,17 @@ export const parseArguments = (args: string[]): CliOptions => {
         }
         break;
 
+      case '--format':
+        if (nextArg && (nextArg === 'typescript' || nextArg === 'zod')) {
+          options.format = nextArg as 'typescript' | 'zod';
+          i++;
+        }
+        break;
+
+      case '--separate-files':
+        options.separateFiles = true;
+        break;
+
       case '--help':
       case '-h':
         options.help = true;
@@ -62,14 +75,20 @@ export const parseArguments = (args: string[]): CliOptions => {
 
 export const printHelp = (): void => {
   const help = `
-airtable-types-gen - Generate TypeScript types from Airtable base schemas
+airtable-types-gen - Generate TypeScript types or Zod schemas from Airtable base schemas
 
 USAGE:
   airtable-types-gen [OPTIONS]
 
 EXAMPLES:
-  # Generate types and output to stdout
+  # Generate TypeScript types and output to stdout
   airtable-types-gen --base-id appXXXXXXXX > types.ts
+  
+  # Generate Zod schemas with TypeScript inference
+  airtable-types-gen --base-id appXXXXXXXX --format zod --output schemas.ts
+  
+  # Generate separate files per table
+  airtable-types-gen --base-id appXXXXXXXX --separate-files --output ./schemas/
   
   # Generate types with flatten support
   airtable-types-gen --base-id appXXXXXXXX --flatten --output types.ts
@@ -79,9 +98,11 @@ EXAMPLES:
 
 OPTIONS:
   -b, --base-id <ID>       Airtable base ID (required)
-  -o, --output <FILE>      Output file (optional, defaults to stdout)
+  -o, --output <FILE>      Output file or directory (optional, defaults to stdout)
   -f, --flatten           Generate types with flatten support
   -t, --tables <NAMES>    Comma-separated list of table names to include
+      --format <FORMAT>    Output format: "typescript" (default) or "zod"
+      --separate-files     Generate separate files per table (requires --output directory)
   -h, --help              Show this help message
   -v, --version           Show version information
 
@@ -92,7 +113,12 @@ ENVIRONMENT VARIABLES:
 For more information, visit: https://github.com/username/airtable-types-gen
 `;
 
-  console.log(help.replace('https://github.com/username/airtable-types-gen', 'https://github.com/Guischk/airtable-types-gen'));
+  console.log(
+    help.replace(
+      'https://github.com/username/airtable-types-gen',
+      'https://github.com/Guischk/airtable-types-gen'
+    )
+  );
 };
 
 export const printVersion = (): void => {

@@ -11,6 +11,8 @@ Inspired by Supabase's type generation, this tool provides a simple CLI to gener
 - 🔒 **Computed Field Awareness** - Automatic detection of readonly/computed fields
 - 🏷️ **Strict Types** - Union types for select fields, proper optional handling
 - 🛠️ **Utility Functions** - Record flattening and helper types
+- 📦 **Multi-file Output** - Generate one file per table with an index
+- ✅ **Zod Schemas** - Generate Zod schemas with inferred TS types
 - ✨ **Conflict Resolution** - Intelligent property naming for edge cases
 - 🧪 **Well Tested** - Comprehensive test suite with Vitest
 
@@ -27,7 +29,7 @@ npx airtable-types-gen --help
 
 ### 1. Set up your environment
 
-**Option A: Using .env file (recommended)**
+#### Option A: Using .env file (recommended)
 
 ```bash
 # Copy the example file
@@ -38,7 +40,7 @@ cp .env.example .env
 # AIRTABLE_BASE_ID=appXXXXXXXX
 ```
 
-**Option B: Environment variables**
+#### Option B: Environment variables
 
 ```bash
 export AIRTABLE_PERSONAL_TOKEN="your_personal_access_token"
@@ -73,9 +75,11 @@ airtable-types-gen [OPTIONS]
 
 OPTIONS:
   -b, --base-id <ID>       Airtable base ID (required)
-  -o, --output <FILE>      Output file (optional, defaults to stdout)
+  -o, --output <FILE>      Output file or directory (optional, defaults to stdout)
   -f, --flatten           Generate types with flatten support
   -t, --tables <NAMES>    Comma-separated list of table names to include
+      --format <FORMAT>    Output format: "typescript" (default) or "zod"
+      --separate-files     Generate separate files per table (requires --output directory)
   -h, --help              Show help message
   -v, --version           Show version information
 
@@ -84,7 +88,7 @@ ENVIRONMENT VARIABLES:
   AIRTABLE_BASE_ID        Default base ID if --base-id is not provided
 ```
 
-## Generated Types
+## Generated Types (TypeScript)
 
 ### Basic Interface
 
@@ -194,6 +198,64 @@ const result = await generateTypes({
 
 console.log(result.content); // Generated TypeScript code
 console.log(result.schema); // Parsed Airtable schema
+```
+
+## Zod Schemas (new in v0.2)
+
+You can generate Zod schemas instead of TypeScript-only types:
+
+```bash
+# Single file with Zod schemas
+npx airtable-types-gen --base-id appXXXXXXXX --format zod --output zod-schemas.ts
+
+# Flattened Zod schemas
+npx airtable-types-gen --base-id appXXXXXXXX --format zod --flatten --output zod-schemas-flat.ts
+
+# One file per table (+ index.ts) with Zod
+npx airtable-types-gen --base-id appXXXXXXXX --format zod --separate-files --output ./schemas
+```
+
+Example usage:
+
+```ts
+import { UsersSchema, type Users } from './schemas/users';
+import { validateRecord, safeValidateRecord } from 'airtable-types-gen/runtime';
+
+// Validate at runtime and get typed data
+const user: Users = validateRecord(UsersSchema, {
+  record_id: 'rec123',
+  Name: 'Jane',
+  Email: 'jane@example.com'
+});
+
+// Or safely
+const result = safeValidateRecord(UsersSchema, someData);
+if (result.success) {
+  // result.data is typed as Users
+} else {
+  console.error(result.error);
+}
+```
+
+## Multi-file generation (new in v0.2)
+
+Generate one file per table plus an index re-export:
+
+```bash
+# TypeScript types per table
+npx airtable-types-gen --base-id appXXXXXXXX --separate-files --output ./types
+
+# Zod schemas per table
+npx airtable-types-gen --base-id appXXXXXXXX --format zod --separate-files --output ./schemas
+```
+
+This produces files like:
+
+```text
+./schemas/
+  users.ts
+  projects.ts
+  index.ts
 ```
 
 ## Integration Examples

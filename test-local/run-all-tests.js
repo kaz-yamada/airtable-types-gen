@@ -32,6 +32,8 @@ async function runAllTests() {
   let testsPassed = 0;
   
   try {
+    
+    const hasCredentials = process.env.AIRTABLE_PERSONAL_TOKEN && process.env.AIRTABLE_BASE_ID;
     // Phase 1: Basic tests (no credentials needed)
     console.log('\n📋 Phase 1: Basic CLI Tests');
     console.log('-'.repeat(30));
@@ -45,6 +47,31 @@ async function runAllTests() {
     testsRun++;
     testsPassed++;
     console.log('✅ Flatten functionality tests passed\n');
+
+    // New Zod and multi-file tests (require credentials)
+    if (hasCredentials) {
+      try {
+        await runCommand('npm', ['run', 'test:zod']);
+        testsRun++;
+        testsPassed++;
+        console.log('✅ Zod format tests passed\n');
+      } catch (error) {
+        testsRun++;
+        console.log('⚠️  Zod format tests failed\n');
+      }
+
+      try {
+        await runCommand('npm', ['run', 'test:multi']);
+        testsRun++;
+        testsPassed++;
+        console.log('✅ Multi-file generation tests passed\n');
+      } catch (error) {
+        testsRun++;
+        console.log('⚠️  Multi-file generation tests failed\n');
+      }
+    } else {
+      console.log('⚠️  Skipping Zod and multi-file tests (require credentials)\n');
+    }
 
     // Phase 2: TypeScript compilation test
     console.log('📋 Phase 2: TypeScript Tests');
@@ -64,7 +91,6 @@ async function runAllTests() {
     console.log('📋 Phase 3: Integration Tests');
     console.log('-'.repeat(30));
     
-    const hasCredentials = process.env.AIRTABLE_PERSONAL_TOKEN && process.env.AIRTABLE_BASE_ID;
     
     if (hasCredentials) {
       console.log('🔑 Credentials found, running integration tests...\n');

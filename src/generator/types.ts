@@ -7,15 +7,16 @@ import {
   isAlwaysPresentComputed,
 } from './schema.js';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-const generateTableInterface = (table: AirtableTable, flatten: boolean = false): string => {
+export const generateTableInterface = (table: AirtableTable, flatten: boolean = false): string => {
   const interfaceName = generateInterfaceName(table.name);
   const interfaceLines: string[] = [];
-  
+
   // Add interface header
   interfaceLines.push('/**');
   interfaceLines.push(` * Interface generated for table "${table.name}"`);
-  interfaceLines.push(` * @description ${table.description || `Table ${table.name} from Airtable`}`);
+  interfaceLines.push(
+    ` * @description ${table.description || `Table ${table.name} from Airtable`}`
+  );
   interfaceLines.push(' */');
 
   if (flatten) {
@@ -54,11 +55,19 @@ const generateTableInterface = (table: AirtableTable, flatten: boolean = false):
 
       const descriptions = [];
       if (field.description) {
-        const cleanDesc = field.description.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\\r/g, ' ').replace(/\r/g, ' ');
+        const cleanDesc = field.description
+          .replace(/\\n/g, ' ')
+          .replace(/\n/g, ' ')
+          .replace(/\\r/g, ' ')
+          .replace(/\r/g, ' ');
         descriptions.push(cleanDesc);
       }
       if (typeMapping.description) {
-        const cleanDesc = typeMapping.description.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\\r/g, ' ').replace(/\r/g, ' ');
+        const cleanDesc = typeMapping.description
+          .replace(/\\n/g, ' ')
+          .replace(/\n/g, ' ')
+          .replace(/\\r/g, ' ')
+          .replace(/\r/g, ' ');
         descriptions.push(cleanDesc);
       }
 
@@ -74,9 +83,7 @@ const generateTableInterface = (table: AirtableTable, flatten: boolean = false):
 
       // Add property
       const needsBrackets = /[^a-zA-Z0-9_$]/.test(propertyName);
-      const propertyKey = needsBrackets
-        ? `["${propertyName.replace(/"/g, '\\"')}"]`
-        : propertyName;
+      const propertyKey = needsBrackets ? `["${propertyName.replace(/"/g, '\\"')}"]` : propertyName;
 
       const readonlyModifier = isReadonly ? 'readonly ' : '';
       interfaceLines.push(`  ${readonlyModifier}${propertyKey}${optional}: ${propertyType};`);
@@ -86,7 +93,7 @@ const generateTableInterface = (table: AirtableTable, flatten: boolean = false):
   } else {
     // Generate standard Airtable interface (native structure)
     const fieldsInterfaceName = `${interfaceName}Fields`;
-    
+
     // First, generate the Fields interface
     interfaceLines.push(`interface ${fieldsInterfaceName} {`);
 
@@ -115,11 +122,19 @@ const generateTableInterface = (table: AirtableTable, flatten: boolean = false):
 
       const descriptions = [];
       if (field.description) {
-        const cleanDesc = field.description.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\\r/g, ' ').replace(/\r/g, ' ');
+        const cleanDesc = field.description
+          .replace(/\\n/g, ' ')
+          .replace(/\n/g, ' ')
+          .replace(/\\r/g, ' ')
+          .replace(/\r/g, ' ');
         descriptions.push(cleanDesc);
       }
       if (typeMapping.description) {
-        const cleanDesc = typeMapping.description.replace(/\\n/g, ' ').replace(/\n/g, ' ').replace(/\\r/g, ' ').replace(/\r/g, ' ');
+        const cleanDesc = typeMapping.description
+          .replace(/\\n/g, ' ')
+          .replace(/\n/g, ' ')
+          .replace(/\\r/g, ' ')
+          .replace(/\r/g, ' ');
         descriptions.push(cleanDesc);
       }
 
@@ -135,9 +150,7 @@ const generateTableInterface = (table: AirtableTable, flatten: boolean = false):
 
       // Add property
       const needsBrackets = /[^a-zA-Z0-9_$]/.test(propertyName);
-      const propertyKey = needsBrackets
-        ? `["${propertyName.replace(/"/g, '\\"')}"]`
-        : propertyName;
+      const propertyKey = needsBrackets ? `["${propertyName.replace(/"/g, '\\"')}"]` : propertyName;
 
       const readonlyModifier = isReadonly ? 'readonly ' : '';
       interfaceLines.push(`  ${readonlyModifier}${propertyKey}${optional}: ${propertyType};`);
@@ -168,9 +181,7 @@ const generateUtilityTypes = (schema: AirtableBaseSchema, flatten: boolean = fal
     .join(' | ');
 
   const tableTypesMapping = schema.tables
-    .map(
-      (table) => `  '${table.name.replace(/'/g, "\\'")}': ${generateInterfaceName(table.name)};`
-    )
+    .map((table) => `  '${table.name.replace(/'/g, "\\'")}': ${generateInterfaceName(table.name)};`)
     .join('\n');
 
   if (flatten) {

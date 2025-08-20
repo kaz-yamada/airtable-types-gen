@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-08-20
+
+### Added in 0.2.0
+
+- Zod: Generate Zod schemas alongside TypeScript types
+  - New `--format zod` flag to output Zod schemas with inferred TS types
+  - Includes helpers in runtime (`validateRecord`, `safeValidateRecord`, etc.)
+- Multi-file output: Generate one file per table plus an index
+  - Use `--separate-files` with `--output <dir>` to emit multiple files
+  - Works for both `typescript` and `zod` formats
+- CLI options:
+  - `--format typescript|zod` to choose output format (default: typescript)
+  - `--separate-files` to split output per table
+  - Existing flags (`--flatten`, `--tables`, `--output`) supported across formats
+
+### Changed in 0.2.0
+
+- Generator: Refactored internals to support format selection and multi-file targets
+- Docs: README expanded with Zod and multi-file examples, plus advanced usage
+
+### Internal in 0.2.0
+
+- Tests: Added unit tests for Zod generator and multi-file emission
+- Runtime: Added Zod utilities for validation and schema ergonomics
+
 ## [0.1.2] - 2025-08-12
 
 ### Added
@@ -46,9 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Dual Mode Support**: Added comprehensive support for both flattened and native Airtable record structures:
-  - Flattened mode: Direct field access (`record.Name` instead of `record.fields.Name`) 
+  - Flattened mode: Direct field access (`record.Name` instead of `record.fields.Name`)
   - Native mode: Standard Airtable structure with separate `fields` object and `createdTime`
-- **Enhanced Interface Generation**: 
+- **Enhanced Interface Generation**:
   - Added proper JSDoc headers for all generated interfaces with table descriptions
   - Improved field documentation with clean description handling (removes line breaks)
   - Better property spacing and formatting in generated code

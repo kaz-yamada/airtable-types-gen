@@ -41,6 +41,12 @@ npm run test:types
 # Test d'intégration avec une vraie base Airtable
 node src/test-real-airtable.js
 
+# Tests des nouvelles fonctionnalités Zod
+npm run test:zod
+
+# Tests de génération multi-fichiers
+npm run test:multi
+
 # Génération de types standard
 npm run generate
 
@@ -49,6 +55,32 @@ npm run generate:flatten
 
 # Test complet : génération + validation
 npm run dev
+```
+
+### Génération Avancée
+
+```bash
+# Génération de schémas Zod
+npm run generate:zod
+
+# Génération Zod avec flatten
+npm run generate:zod-flat
+
+# Génération TypeScript multi-fichiers
+npm run generate:multi-ts
+
+# Génération Zod multi-fichiers
+npm run generate:multi-zod
+```
+
+### Démonstrations
+
+```bash
+# Démonstration des schémas Zod
+npm run demo:zod
+
+# Démonstration de la génération multi-fichiers
+npm run demo:multi
 ```
 
 ## Structure des Tests
@@ -65,17 +97,45 @@ npm run dev
 - Utilise des données mock
 - Démontre les avantages du flattening
 
-### 3. `test-types.ts`
+### 3. `test-zod-format.js` 🆕
+
+- Teste la génération de schémas Zod
+- Valide les patterns de validation (email, URL, dates)
+- Teste le mode flatten avec Zod
+- Nécessite des credentials Airtable
+
+### 4. `test-separate-files.js` 🆕
+
+- Teste la génération multi-fichiers
+- Valide la structure TypeScript et Zod
+- Vérifie les conventions de nommage
+- Teste l'index de re-export
+
+### 5. `test-types.ts`
 
 - Valide la sécurité des types générés
 - Teste les types `CreateRecord`, `UpdateRecord`
-- Vérife les champs readonly/optionnels
+- Vérifie les champs readonly/optionnels
 
-### 4. `test-real-airtable.js`
+### 6. `test-real-airtable.js`
 
 - Intégration complète avec Airtable
 - Teste l'API Meta et les records
 - Valide le workflow complet
+
+### Exemples et Démonstrations
+
+### 7. `example-zod-usage.js` 🆕
+
+- Démonstration complète des schémas Zod
+- Exemples d'usage avec validation
+- Patterns d'intégration avec Airtable
+
+### 8. `example-multi-file-usage.js` 🆕
+
+- Guide d'utilisation des fichiers séparés
+- Comparaison fichier unique vs multi-fichiers
+- Bonnes pratiques d'organisation
 
 ## Workflow de Test Recommandé
 
@@ -109,12 +169,25 @@ npm run test:types
 
 ## Dossiers Générés
 
-- `generated/types.ts` : Types générés standard
-- `generated/types-flat.ts` : Types avec support flatten
+```
+generated/
+├── types.ts              # Types TypeScript standard
+├── types-flat.ts         # Types TypeScript avec flatten
+├── zod-schemas.ts        # Schémas Zod en fichier unique
+├── zod-schemas-flat.ts   # Schémas Zod flatten en fichier unique
+├── types/                # Types TypeScript par fichier
+│   ├── index.ts
+│   ├── users.ts
+│   └── projects.ts
+└── schemas/              # Schémas Zod par fichier
+    ├── index.ts
+    ├── users.ts
+    └── projects.ts
+```
 
-## Exemple d'Usage
+## Exemples d'Usage
 
-Après génération des types, vous pouvez les utiliser ainsi :
+### TypeScript Standard
 
 ```typescript
 import type { YourTableRecord, CreateRecord } from './generated/types';
@@ -130,6 +203,44 @@ const newRecord: CreateRecord<'YourTable'> = {
 const record = await base('YourTable').find('recXXX');
 const flattened = flattenRecord(record);
 console.log(flattened.Name); // Accès direct
+```
+
+### Schémas Zod
+
+```typescript
+import { UsersSchema, type Users } from './generated/schemas/users';
+import { validateRecord } from './generated/schemas';
+
+// Validation avec Zod
+try {
+  const user: Users = UsersSchema.parse(rawData);
+  console.log('Utilisateur validé:', user.fields.Name);
+} catch (error) {
+  console.error('Données invalides:', error.errors);
+}
+
+// Validation safe
+const result = UsersSchema.safeParse(rawData);
+if (result.success) {
+  const user = result.data;
+  // Utilisation type-safe
+}
+```
+
+### Multi-fichiers
+
+```typescript
+// Import spécifique
+import type { UsersRecord } from './generated/types/users';
+import { UsersSchema } from './generated/schemas/users';
+
+// Import via index
+import { 
+  type UsersRecord,
+  type ProjectsRecord,
+  UsersSchema,
+  ProjectsSchema 
+} from './generated/schemas';
 ```
 
 ## Résolution de Problèmes
@@ -154,6 +265,45 @@ console.log(flattened.Name); // Accès direct
 - Vérifiez que la base contient des tables
 - Vérifiez la connectivité réseau
 - Consultez les logs pour plus de détails
+
+### Erreurs Zod ou multi-fichiers
+
+- Vérifiez que la dépendance `zod` est installée
+- Assurez-vous que le dossier de sortie existe
+- Vérifiez les permissions d'écriture
+
+### Tests échouent
+
+- Exécutez `npm run build` dans le dossier parent
+- Vérifiez que les credentials sont corrects
+- Testez d'abord avec une base simple
+
+## Nouvelles Fonctionnalités 🆕
+
+### Format Zod
+
+Le générateur peut maintenant produire des schémas Zod avec validation runtime :
+
+- Validation des emails, URLs, dates
+- Messages d'erreur personnalisés
+- Types TypeScript inférés automatiquement
+- Utilitaires de validation inclus
+
+### Fichiers Séparés
+
+Générez un fichier par table pour une meilleure organisation :
+
+- Meilleure lisibilité du code
+- Imports sélectifs (performance)
+- Maintenance simplifiée
+- Compatible bundlers modernes
+
+### Commandes Étendues
+
+```bash
+# Toutes les nouvelles options
+airtable-types-gen --format zod --separate-files --flatten --output ./schemas/
+```
 
 ## Support
 
