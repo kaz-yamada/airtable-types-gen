@@ -178,8 +178,14 @@ export const mapAirtableTypeToZod = (field: AirtableField): ZodMappingResult => 
       break;
 
     case 'aiText':
-      schema = z.string();
-      description = readonly ? '🔒 Computed by Airtable - AI generated text' : 'AI generated text';
+      schema = z.object({
+        state: z.enum(['generated', 'pending', 'error', 'empty']),
+        value: z.string(),
+        isStale: z.boolean(),
+      });
+      description = readonly
+        ? '🔒 Computed by Airtable - AI generated text object'
+        : 'AI generated text object';
       break;
 
     default:

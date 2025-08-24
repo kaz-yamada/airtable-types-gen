@@ -42,6 +42,12 @@ export interface GenerateOptions {
   tables?: string[];
 }
 
+export interface AirtableAiTextValue {
+  state: 'generated' | 'pending' | 'error' | 'empty';
+  value: string;
+  isStale: boolean;
+}
+
 export interface GenerateResult {
   content: string;
   schema: AirtableBaseSchema;

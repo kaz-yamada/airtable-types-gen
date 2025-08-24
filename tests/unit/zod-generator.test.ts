@@ -174,6 +174,11 @@ describe('Zod Generator', () => {
             type: 'multipleSelects' as const,
             options: { choices: [{ name: 'Tag1' }, { name: 'Tag2' }] },
           },
+          {
+            id: 'fld11',
+            name: 'AiText',
+            type: 'aiText' as const,
+          },
         ],
       };
 
@@ -189,6 +194,32 @@ describe('Zod Generator', () => {
       expect(result).toContain("DateTime: z.string().datetime('Invalid ISO datetime format')");
       expect(result).toContain("Select: z.enum(['Option1', 'Option2'])");
       expect(result).toContain("MultiSelect: z.array(z.enum(['Tag1', 'Tag2']))");
+      expect(result).toContain('AiText: z.object({');
+      expect(result).toContain("state: z.enum(['generated', 'pending', 'error', 'empty'])");
+      expect(result).toContain('value: z.string()');
+      expect(result).toContain('isStale: z.boolean()');
+    });
+
+    it('should generate correct aiText validation schema', () => {
+      const aiTextTable = {
+        ...mockTable,
+        name: 'AiTextTable',
+        fields: [
+          {
+            id: 'fld1',
+            name: 'AI Summary',
+            type: 'aiText' as const,
+          },
+        ],
+      };
+
+      const result = generateTableZodSchema(aiTextTable, true);
+
+      expect(result).toContain('["AI Summary"]: z.object({');
+      expect(result).toContain("state: z.enum(['generated', 'pending', 'error', 'empty'])");
+      expect(result).toContain('value: z.string()');
+      expect(result).toContain('isStale: z.boolean()');
+      expect(result).toContain('}).readonly()'); // Should be readonly since aiText is computed
     });
   });
 });

@@ -266,8 +266,15 @@ const generateZodSchemaString = (schema: z.ZodType<any>): string => {
   }
 
   if (schema instanceof z.ZodObject) {
-    // For simple objects, we'll just return a generic representation
-    return 'z.object({ /* ... */ })';
+    const shape = (schema as any)._def.shape();
+    const properties: string[] = [];
+
+    for (const [key, value] of Object.entries(shape)) {
+      const propSchema = generateZodSchemaString(value as z.ZodType<any>);
+      properties.push(`${key}: ${propSchema}`);
+    }
+
+    return `z.object({ ${properties.join(', ')} })`;
   }
 
   if (schema instanceof z.ZodUnion) {

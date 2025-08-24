@@ -47,6 +47,11 @@ export const mockTable: AirtableTable = {
       id: 'fldAutoNumber',
       name: 'Auto ID',
       type: 'autoNumber',
+    },
+    {
+      id: 'fldAiSummary',
+      name: 'AI Summary',
+      type: 'aiText',
     }
   ],
   views: [

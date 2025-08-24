@@ -11,6 +11,7 @@ const COMPUTED_FIELD_TYPES = [
   'createdBy',
   'lastModifiedBy',
   'autoNumber',
+  'aiText',
 ] as const;
 
 // Types de champs computed qui sont TOUJOURS présents (jamais undefined)
@@ -215,9 +216,12 @@ export const mapAirtableTypeToTSEnhanced = (field: AirtableField): TypeMappingRe
       break;
 
     case 'aiText':
-      type = 'string';
-      strictType = 'string';
-      description = readonly ? '🔒 Computed by Airtable - AI generated text' : 'AI generated text';
+      type =
+        '{ state: "generated" | "pending" | "error" | "empty"; value: string; isStale: boolean }';
+      strictType = 'AirtableAiTextValue';
+      description = readonly
+        ? '🔒 Computed by Airtable - AI generated text object'
+        : 'AI generated text object';
       break;
 
     default:

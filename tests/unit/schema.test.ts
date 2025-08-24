@@ -18,6 +18,11 @@ describe('detectComputedField', () => {
     });
   });
 
+  it('should detect aiText as computed field type', () => {
+    const field: AirtableField = { id: 'test', name: 'AI Summary', type: 'aiText' };
+    expect(detectComputedField(field)).toBe(true);
+  });
+
   it('should not detect non-computed field types as computed', () => {
     const nonComputedTypes = ['singleLineText', 'number', 'checkbox', 'email'];
     
@@ -123,6 +128,31 @@ describe('mapAirtableTypeToTSEnhanced', () => {
 
     const result = mapAirtableTypeToTSEnhanced(regularField);
     expect(result.readonly).toBe(false);
+  });
+
+  it('should map aiText fields to complex object structure', () => {
+    const aiTextField: AirtableField = {
+      id: 'test',
+      name: 'Summary',
+      type: 'aiText'
+    };
+
+    const result = mapAirtableTypeToTSEnhanced(aiTextField);
+    expect(result.type).toBe('{ state: "generated" | "pending" | "error" | "empty"; value: string; isStale: boolean }');
+    expect(result.strictType).toBe('AirtableAiTextValue');
+    expect(result.description).toContain('AI generated text object');
+  });
+
+  it('should mark aiText fields as readonly when computed', () => {
+    const aiTextField: AirtableField = {
+      id: 'test',
+      name: 'AI Summary',
+      type: 'aiText'
+    };
+
+    const result = mapAirtableTypeToTSEnhanced(aiTextField);
+    expect(result.readonly).toBe(true);
+    expect(result.description).toContain('🔒 Computed by Airtable');
   });
 });
 

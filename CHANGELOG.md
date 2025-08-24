@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-08-24
+
+### ✨ Added
+
+- **Enhanced AI Text Support** - Complete support for Airtable's complex aiText field format
+  - New `AirtableAiTextValue` interface with `{ state, value, isStale }` structure
+  - Support for all AI text states: `generated`, `pending`, `error`, `empty`
+  - Full TypeScript and Zod schema generation with strict validation
+  - Automatic detection as computed/readonly field type
+
+### 🐛 Fixed
+
+- **Zod Object Schema Generation** - Fixed `generateZodSchemaString` to properly expand complex object schemas instead of showing `z.object({ /* ... */ })`
+- **AI Text Field Mapping** - Updated schema mapping to generate proper complex object types instead of simple strings
+
+### 🧪 Testing
+
+- **New Test Suite** - Added 12 new tests specifically for aiText integration:
+  - Unit tests for TypeScript type generation
+  - Unit tests for Zod schema validation
+  - Integration tests for complete generation workflow
+  - Tests for all AI text states and edge cases
+- **Test Coverage** - All 117 tests now pass, maintaining 100% backward compatibility
+
+### 🔧 Technical Improvements
+
+- **Type Definitions** - Added `AirtableAiTextValue` interface to core types
+- **Schema Validation** - Enhanced Zod generator to handle nested object structures correctly
+- **Field Classification** - Added `aiText` to computed field types for proper readonly detection
+
 ## [0.3.0] - 2025-08-20
 
 ### 💥 Breaking Changes
