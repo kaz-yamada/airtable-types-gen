@@ -50,6 +50,8 @@ describe('generateTypes integration', () => {
     expect(result.content).toContain('export interface ProjectsRecord');
     expect(result.content).toContain('export interface FlattenedRecord');
     expect(result.content).toContain('export { flattenRecord }');
+    expect(result.content).toContain('export const AIRTABLE_TABLE_NAMES');
+    expect(result.content).toContain("AIRTABLE_TABLE_NAMES = ['Users', 'Projects'] as const;");
     expect(result.schema).toEqual(mockAirtableSchema);
   });
 
@@ -129,15 +131,19 @@ describe('generateTypes integration', () => {
 
     // Check utility types
     expect(result.content).toContain('export type AirtableTableName');
+    expect(result.content).toContain('export const AIRTABLE_TABLE_NAMES');
     expect(result.content).toContain('export interface AirtableTableTypes');
     expect(result.content).toContain('export type GetTableRecord<T extends AirtableTableName>');
     expect(result.content).toContain('export type CreateRecord<T extends AirtableTableName>');
     expect(result.content).toContain('export type UpdateRecord<T extends AirtableTableName>');
     expect(result.content).toContain('export type ReadRecord<T extends AirtableTableName>');
-    
+
     // Check table name union
     expect(result.content).toContain("'Users' | 'Projects'");
-    
+
+    // Check table names array runtime constant
+    expect(result.content).toContain("AIRTABLE_TABLE_NAMES = ['Users', 'Projects'] as const;");
+
     // Check table mapping
     expect(result.content).toContain("'Users': UsersRecord;");
     expect(result.content).toContain("'Projects': ProjectsRecord;");

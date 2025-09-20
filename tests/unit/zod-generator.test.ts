@@ -94,6 +94,7 @@ describe('Zod Generator', () => {
       const result = generateUtilityZodTypes(mockSchema);
 
       expect(result).toContain('export type AirtableTableName =');
+      expect(result).toContain('export const AIRTABLE_TABLE_NAMES');
       expect(result).toContain('export interface AirtableTableSchemas');
       expect(result).toContain('export type GetTableSchema<T extends AirtableTableName>');
       expect(result).toContain('export type GetTableType<T extends AirtableTableName>');
@@ -104,9 +105,12 @@ describe('Zod Generator', () => {
       const result = generateUtilityZodTypes(mockSchema);
 
       expect(result).toContain("'Users'");
-      
+
       // Should contain schema and type mappings
   expect(result).toContain("'Users': { schema: typeof UsersSchema, type: UsersRecord }");
+
+      // Check table names array runtime constant
+      expect(result).toContain("AIRTABLE_TABLE_NAMES = ['Users', 'Projects'] as const;");
 
   // Always include readonly fields arrays
   expect(result).toContain('UsersReadonlyFields');
@@ -119,6 +123,10 @@ describe('Zod Generator', () => {
 
       // Re-export of flattenRecord
       expect(result).toContain("export { flattenRecord } from 'airtable-types-gen/runtime'");
+
+      // Check table names array runtime constant is present in flatten mode too
+      expect(result).toContain('export const AIRTABLE_TABLE_NAMES');
+      expect(result).toContain("AIRTABLE_TABLE_NAMES = ['Users', 'Projects'] as const;");
 
       // Per-table readonly fields array
       expect(result).toContain('UsersReadonlyFields');

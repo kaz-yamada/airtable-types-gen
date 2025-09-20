@@ -301,6 +301,10 @@ export const generateUtilityZodTypes = (
     .map((table) => `'${table.name.replace(/'/g, "\\'")}'`)
     .join(' | ');
 
+  const tableNamesArray = schema.tables
+    .map((table) => `'${table.name.replace(/'/g, "\\'")}'`)
+    .join(', ');
+
   const schemaExports = schema.tables
     .map((table) => {
       const schemaName = generateSchemaName(table.name);
@@ -339,6 +343,12 @@ ${flatten ? "import { createUpdateSchema, createCreationSchema } from 'airtable-
  * Union type of all available table names
  */
 export type AirtableTableName = ${tableNames};
+
+/**
+ * Array of all available table names (runtime constant)
+ * Allows iteration over table names at runtime
+ */
+export const AIRTABLE_TABLE_NAMES = [${tableNamesArray}] as const;
 
 /**
  * Mapping of table names to their schemas and types

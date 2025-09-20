@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-09-20
+
+### ✨ Added
+
+- **Runtime Table Names Constant** - New `AIRTABLE_TABLE_NAMES` constant for runtime iteration over table names
+  - Available in both TypeScript and Zod generators
+  - Generated as `export const AIRTABLE_TABLE_NAMES = ['Users', 'Projects', 'Tasks'] as const;`
+  - Works in all modes: standard, flatten, TypeScript-only, and Zod
+  - Enables runtime iteration: `for (const tableName of AIRTABLE_TABLE_NAMES) { ... }`
+  - Supports array methods: `.length`, `.includes()`, `.forEach()`, etc.
+  - Maintains type safety with `as const` assertion
+
+### 🎯 Use Cases Enabled
+
+- **Record Counting**: Iterate over all tables to count records
+- **Batch Processing**: Process all tables programmatically
+- **Table Existence Checks**: Verify if specific tables exist in the schema
+- **Dynamic Operations**: Build table selectors, reports, and analytics
+- **Metadata Generation**: Create table listings and documentation
+
+### 🧪 Testing
+
+- **Comprehensive Test Coverage** - Added tests for both TypeScript and Zod generators
+  - Validates constant generation in standard and flatten modes
+  - Ensures consistency between TypeScript and Zod outputs
+  - Verifies correct table name extraction and formatting
+- **All 117 tests pass** - Maintains 100% backward compatibility
+
+### 🔧 Technical Implementation
+
+- **TypeScript Generator** - Enhanced `generateUtilityTypes()` function
+- **Zod Generator** - Enhanced `generateUtilityZodTypes()` function
+- **Consistent Output** - Same constant format across all generation modes
+- **Type Safety** - Leverages `as const` for literal type inference
+
 ## [0.3.1] - 2025-08-24
 
 ### ✨ Added

@@ -184,6 +184,10 @@ const generateUtilityTypes = (schema: AirtableBaseSchema, flatten: boolean = fal
     .map((table) => `  '${table.name.replace(/'/g, "\\'")}': ${generateInterfaceName(table.name)};`)
     .join('\n');
 
+  const tableNamesArray = schema.tables
+    .map((table) => `'${table.name.replace(/'/g, "\\'")}'`)
+    .join(', ');
+
   if (flatten) {
     // Flattened mode utility types
     return `
@@ -191,6 +195,12 @@ const generateUtilityTypes = (schema: AirtableBaseSchema, flatten: boolean = fal
  * Union type of all available table names
  */
 export type AirtableTableName = ${tableNames};
+
+/**
+ * Array of all available table names (runtime constant)
+ * Allows iteration over table names at runtime
+ */
+export const AIRTABLE_TABLE_NAMES = [${tableNamesArray}] as const;
 
 /**
  * Mapping of table names to their flattened record types
@@ -243,6 +253,12 @@ export { flattenRecord } from 'airtable-types-gen/runtime';
  * Union type of all available table names
  */
 export type AirtableTableName = ${tableNames};
+
+/**
+ * Array of all available table names (runtime constant)
+ * Allows iteration over table names at runtime
+ */
+export const AIRTABLE_TABLE_NAMES = [${tableNamesArray}] as const;
 
 /**
  * Mapping of table names to their record types (native Airtable structure)
